@@ -25,11 +25,51 @@
 //  SOFTWARE.
 //
 
+struct Getter {
+
+    private enum State {
+        case Key(key: String, decoder: Decoder)
+        case Ready(get: () -> Any?)
+    }
+    private var state: State
+    private var transformers = ContiguousArray<Any? -> Any?>()
+
+    private init(key: String, decoder: Decoder) {
+        state = .Key(key: key, decoder: decoder)
+    }
+
+    private init<V>(value: V) {
+        state = .Ready(get: { value })
+    }
+
+    private mutating func addTransformer<From, To>(f: From? -> To?) {
+        if case .Key(let key, let decoder) = state {
+            state = .Ready(get: {
+                decoder.decodeForKey(key) as From?
+            })
+        }
+        transformers.append { v in
+            f(v as! From?)
+        }
+    }
+
+    func get<T>() -> T? {
+        switch state {
+        case .Key(key: let key, decoder: let decoder):
+            assert(transformers.isEmpty, "Getter should not have any transformers if initial type is unresolved.")
+            return decoder.decodeForKey(key) as T?
+        case .Ready(get: let getter):
+            return transformers.reduce(getter()) { (v, f) in f(v) } as! T?
+        }
+    }
+
+}
+
 public final class Migrator {
 
     private let decoder: Decoder
 
-    private(set) var values = Dictionary<String, Void -> Any?>()
+    private(set) var values = Dictionary<String, Getter>()
 
     init(decoder: Decoder) {
         self.decoder = decoder
@@ -37,27 +77,20 @@ public final class Migrator {
 
     /// Add value `v` for `key`. If a value already exists for `key`, it is overwritten.
     public func addValue<V>(v: V, forKey key: String) {
-        values[key] = { v }
+        values[key] = Getter(value: v)
     }
 
-    private func getterForKey<V>(key: String) -> (Void -> V?) {
-        if let g = values[key] { return g as! (Void -> V?) }
-        return {
-            self.decoder.decodeForKey(key) as V?
-        }
+    private func getterForKey(key: String) -> Getter {
+        return values[key] ?? Getter(key: key, decoder: decoder)
     }
 
     /// Transform the value for `key` using `transformer`, storing it in `toKey`, or `key` if not provided.
-    public func migrateKey<From, To>(key: String, toKey: String? = nil, transformer: From -> To) {
+    public func migrateKey<From, To>(key: String, toKey: String? = nil, transformer: From? -> To?) {
         let toKey = toKey ?? key
-        let getter = getterForKey(key) as (Void -> From?)
+        var getter = getterForKey(key)
         values[key] = nil
-        values[toKey] = {
-            if let v = getter() {
-                return Optional(transformer(v))
-            }
-            return nil
-        }
+        getter.addTransformer(transformer)
+        values[toKey] = getter
     }
 
     /// Migrate the value for `key` to `toKey`.

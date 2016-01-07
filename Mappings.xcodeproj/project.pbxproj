@@ -19,6 +19,8 @@
 		37D321BC1C3E280A00E2245F /* Mapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321BA1C3E280A00E2245F /* Mapper.swift */; };
 		37D321BE1C3E550C00E2245F /* NSCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B11C3DE7EC00E2245F /* NSCoder.swift */; };
 		37D321BF1C3E550D00E2245F /* NSCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B11C3DE7EC00E2245F /* NSCoder.swift */; };
+		37D321C71C3E7C7400E2245F /* ObjSer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321C51C3E7C7400E2245F /* ObjSer.swift */; };
+		37D321CC1C3E846000E2245F /* ObjSer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321C51C3E7C7400E2245F /* ObjSer.swift */; };
 		37E0C57E1C3D4380002182A2 /* Mappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E0C57D1C3D4380002182A2 /* Mappings.swift */; };
 		37E0C57F1C3D4380002182A2 /* Mappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E0C57D1C3D4380002182A2 /* Mappings.swift */; };
 /* End PBXBuildFile section */
@@ -54,6 +56,9 @@
 		37D321B11C3DE7EC00E2245F /* NSCoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSCoder.swift; sourceTree = "<group>"; };
 		37D321B71C3DE81B00E2245F /* Migrator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Migrator.swift; sourceTree = "<group>"; };
 		37D321BA1C3E280A00E2245F /* Mapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mapper.swift; sourceTree = "<group>"; };
+		37D321C01C3E7C0900E2245F /* ObjSer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ObjSer.framework; path = Carthage/Build/Mac/ObjSer.framework; sourceTree = "<group>"; };
+		37D321C21C3E7C4800E2245F /* ObjSer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ObjSer.framework; path = Carthage/Build/iOS/ObjSer.framework; sourceTree = "<group>"; };
+		37D321C51C3E7C7400E2245F /* ObjSer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjSer.swift; sourceTree = "<group>"; };
 		37E0C57D1C3D4380002182A2 /* Mappings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mappings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -128,6 +133,7 @@
 		377C0C2E1C39055800B1840F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				37D321C41C3E7C5100E2245F /* Dependencies */,
 				377C0C2F1C39055800B1840F /* Tests.swift */,
 				377C0C561C3906E800B1840F /* Info-iOS.plist */,
 				377C0C571C3906E800B1840F /* Info-Mac.plist */,
@@ -139,8 +145,19 @@
 			isa = PBXGroup;
 			children = (
 				37D321B11C3DE7EC00E2245F /* NSCoder.swift */,
+				37D321C51C3E7C7400E2245F /* ObjSer.swift */,
 			);
 			path = Adaptors;
+			sourceTree = "<group>";
+		};
+		37D321C41C3E7C5100E2245F /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				37D321C01C3E7C0900E2245F /* ObjSer.framework */,
+				37D321C21C3E7C4800E2245F /* ObjSer.framework */,
+			);
+			name = Dependencies;
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -190,6 +207,7 @@
 				377C0C261C39055800B1840F /* Sources */,
 				377C0C271C39055800B1840F /* Frameworks */,
 				377C0C281C39055800B1840F /* Resources */,
+				37D321CD1C3E84AE00E2245F /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -312,6 +330,23 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		37D321CD1C3E84AE00E2245F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/Mac/ObjSer.framework",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		377C0C1B1C39055800B1840F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -328,6 +363,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37D321BE1C3E550C00E2245F /* NSCoder.swift in Sources */,
+				37D321CC1C3E846000E2245F /* ObjSer.swift in Sources */,
 				377C0C301C39055800B1840F /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -347,6 +383,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37D321BF1C3E550D00E2245F /* NSCoder.swift in Sources */,
+				37D321C71C3E7C7400E2245F /* ObjSer.swift in Sources */,
 				377C0C591C39076D00B1840F /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -498,6 +535,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				INFOPLIST_FILE = "Tests/Info-Mac.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.MostlyInfinite.$(PROJECT_NAME)Tests";
@@ -510,6 +551,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				INFOPLIST_FILE = "Tests/Info-Mac.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.MostlyInfinite.$(PROJECT_NAME)Tests";
@@ -566,6 +611,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = "Tests/Info-iOS.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -580,6 +629,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = "Tests/Info-iOS.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

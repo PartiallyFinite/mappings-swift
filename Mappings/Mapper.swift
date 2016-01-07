@@ -29,12 +29,12 @@ public final class Mapper {
 
     private enum State {
         case Encoding(Encoder)
-        case Decoding(Decoder, values: Dictionary<String, Void -> Any?>)
+        case Decoding(Decoder, values: Dictionary<String, Getter>)
     }
 
     private let state: State
 
-    init(decoder: Decoder, valueMap: Dictionary<String, Void -> Any?>) {
+    init(decoder: Decoder, valueMap: Dictionary<String, Getter>) {
         state = .Decoding(decoder, values: valueMap)
     }
 
@@ -42,9 +42,9 @@ public final class Mapper {
         state = .Encoding(encoder)
     }
 
-    private func decodeForKey<T>(key: String, decoder: Decoder, values: Dictionary<String, Void -> Any?>) -> T? {
-        if let decode = values[key] {
-            return decode() as! T?
+    private func decodeForKey<T>(key: String, decoder: Decoder, values: Dictionary<String, Getter>) -> T? {
+        if let getter = values[key] {
+            return getter.get()
         }
         return decoder.decodeForKey(key)
     }
