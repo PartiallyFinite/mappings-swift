@@ -46,7 +46,12 @@ class A : NSObject, NSCoding, InitableSerialisable, Mappable {
 
     required init?(coder aDecoder: NSCoder) {
         super.init()
-        guard (try? Mappings.decode(self, with: aDecoder)) != nil else { return nil }
+        do {
+            try Mappings.decode(self, with: aDecoder)
+        }
+        catch {
+            return nil
+        }
     }
 
     func encodeWithCoder(aCoder: NSCoder) {
@@ -68,7 +73,7 @@ class A : NSObject, NSCoding, InitableSerialisable, Mappable {
 
 }
 
-final class B : NSObject, NSCoding, InitableSerialisable, Mappable {
+class B : NSObject, NSCoding, InitableSerialisable, Mappable {
 
     var x: Int = 0
     var y: Float?
