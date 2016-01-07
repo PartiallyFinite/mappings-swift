@@ -67,10 +67,6 @@ class A : NSObject, NSCoding, InitableSerialisable, Mappable {
         Mappings.encode(self, with: ser)
     }
 
-    override class func classForKeyedUnarchiver() -> AnyClass {
-        return B.self
-    }
-
 }
 
 class B : NSObject, NSCoding, InitableSerialisable, Mappable {
@@ -118,6 +114,53 @@ class B : NSObject, NSCoding, InitableSerialisable, Mappable {
 
 }
 
+class C : NSObject, NSCoding, InitableSerialisable, Mappable {
+
+    var y: Int?
+    var z: [String]!
+
+    required init(y: Int, z: [String]) {
+        self.y = y
+        self.z = z
+    }
+
+    static let migrators: [Migrator -> Void] = [
+        { m in
+            m.migrateKey("y", toKey: "z")
+            m.addValue(7.2 as Float, forKey: "y")
+        },
+        { m in
+            m.migrateKey("y") { (v: Float?) -> Int? in
+                v != nil ? Int(v!) : nil
+            }
+        }
+    ]
+
+    func mapWith(mapper: Mapper) {
+        mapper.map(&y, forKey: "y")
+        mapper.map(&z, forKey: "z")
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init()
+        guard (try? Mappings.decode(self, with: aDecoder)) != nil else { return nil }
+    }
+
+    func encodeWithCoder(aCoder: NSCoder) {
+        Mappings.encode(self, with: aCoder)
+    }
+
+    required init(deserialiser des: Deserialiser) throws {
+        super.init()
+        try Mappings.decode(self, with: des)
+    }
+
+    func serialiseWith(ser: Serialiser) {
+        Mappings.encode(self, with: ser)
+    }
+
+}
+
 class MappingsTests: XCTestCase {
 
     var a: A!
@@ -133,23 +176,47 @@ class MappingsTests: XCTestCase {
         super.tearDown()
     }
 
-    func eq(b: B) {
+    func eqAB(b: B) {
         XCTAssertEqual(a.x, b.x)
         XCTAssertEqual(a.y, b.z)
         XCTAssertEqual(7.2, b.y)
     }
+
+    func eqAC(c: C) {
+        XCTAssertEqual(a.y, c.z)
+        XCTAssertEqual(c.y, 7)
+    }
+
+    func eqBC(b: B, c: C) {
+        XCTAssertEqual(Int(b.y!), c.y!)
+        XCTAssertEqual(b.z, c.z)
+    }
     
     func testNSCoding() {
-        let data = NSKeyedArchiver.archivedDataWithRootObject(a)
-        let b = NSKeyedUnarchiver.unarchiveObjectWithData(data)! as! B
-        eq(b)
+        let dataA = NSKeyedArchiver.archivedDataWithRootObject(a)
+        NSKeyedUnarchiver.setClass(B.self, forClassName: "MappingsTests.A")
+        let b = NSKeyedUnarchiver.unarchiveObjectWithData(dataA)! as! B
+        eqAB(b)
+        NSKeyedUnarchiver.setClass(C.self, forClassName: "MappingsTests.A")
+        let c = NSKeyedUnarchiver.unarchiveObjectWithData(dataA)! as! C
+        eqAC(c)
+        let dataB = NSKeyedArchiver.archivedDataWithRootObject(b)
+        NSKeyedUnarchiver.setClass(C.self, forClassName: "MappingsTests.B")
+        let cc = NSKeyedUnarchiver.unarchiveObjectWithData(dataB)! as! C
+        eqBC(b, c: cc)
     }
 
     func testObjSer() {
-        let out = OutputStream()
-        ObjSer.serialise(a, to: out)
-        let b: B = try! ObjSer.deserialiseFrom(InputStream(bytes: out.bytes))
-        eq(b)
+        let outA = OutputStream()
+        ObjSer.serialise(a, to: outA)
+        let b: B = try! ObjSer.deserialiseFrom(InputStream(bytes: outA.bytes))
+        eqAB(b)
+        let c: C = try! ObjSer.deserialiseFrom(InputStream(bytes: outA.bytes))
+        eqAC(c)
+        let outB = OutputStream()
+        ObjSer.serialise(b, to: outB)
+        let cc: C = try! ObjSer.deserialiseFrom(InputStream(bytes: outB.bytes))
+        eqBC(b, c: cc)
     }
 
 }
