@@ -13,12 +13,12 @@
 		377C0C491C39068300B1840F /* Mappings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 377C0C3F1C39068300B1840F /* Mappings.framework */; };
 		377C0C591C39076D00B1840F /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C0C2F1C39055800B1840F /* Tests.swift */; };
 		377C0C5A1C39077000B1840F /* Mappings.h in Headers */ = {isa = PBXBuildFile; fileRef = 377C0C231C39055800B1840F /* Mappings.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		37D321B21C3DE7EC00E2245F /* NSCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B11C3DE7EC00E2245F /* NSCoder.swift */; };
-		37D321B31C3DE7EC00E2245F /* NSCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B11C3DE7EC00E2245F /* NSCoder.swift */; };
 		37D321B81C3DE81B00E2245F /* Migrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B71C3DE81B00E2245F /* Migrator.swift */; };
 		37D321B91C3DE81B00E2245F /* Migrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B71C3DE81B00E2245F /* Migrator.swift */; };
 		37D321BB1C3E280A00E2245F /* Mapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321BA1C3E280A00E2245F /* Mapper.swift */; };
 		37D321BC1C3E280A00E2245F /* Mapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321BA1C3E280A00E2245F /* Mapper.swift */; };
+		37D321BE1C3E550C00E2245F /* NSCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B11C3DE7EC00E2245F /* NSCoder.swift */; };
+		37D321BF1C3E550D00E2245F /* NSCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D321B11C3DE7EC00E2245F /* NSCoder.swift */; };
 		37E0C57E1C3D4380002182A2 /* Mappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E0C57D1C3D4380002182A2 /* Mappings.swift */; };
 		37E0C57F1C3D4380002182A2 /* Mappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E0C57D1C3D4380002182A2 /* Mappings.swift */; };
 /* End PBXBuildFile section */
@@ -95,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				377C0C221C39055800B1840F /* Mappings */,
+				37D321BD1C3E54C500E2245F /* Adaptors */,
 				377C0C2E1C39055800B1840F /* Tests */,
 				377C0C211C39055800B1840F /* Products */,
 			);
@@ -118,7 +119,6 @@
 				37E0C57D1C3D4380002182A2 /* Mappings.swift */,
 				37D321BA1C3E280A00E2245F /* Mapper.swift */,
 				37D321B71C3DE81B00E2245F /* Migrator.swift */,
-				37D321B11C3DE7EC00E2245F /* NSCoder.swift */,
 				377C0C251C39055800B1840F /* Info-Mac.plist */,
 				377C0C581C3906F400B1840F /* Info-iOS.plist */,
 			);
@@ -133,6 +133,14 @@
 				377C0C571C3906E800B1840F /* Info-Mac.plist */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		37D321BD1C3E54C500E2245F /* Adaptors */ = {
+			isa = PBXGroup;
+			children = (
+				37D321B11C3DE7EC00E2245F /* NSCoder.swift */,
+			);
+			path = Adaptors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -312,7 +320,6 @@
 				37D321BB1C3E280A00E2245F /* Mapper.swift in Sources */,
 				37D321B81C3DE81B00E2245F /* Migrator.swift in Sources */,
 				37E0C57E1C3D4380002182A2 /* Mappings.swift in Sources */,
-				37D321B21C3DE7EC00E2245F /* NSCoder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +327,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37D321BE1C3E550C00E2245F /* NSCoder.swift in Sources */,
 				377C0C301C39055800B1840F /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -331,7 +339,6 @@
 				37D321BC1C3E280A00E2245F /* Mapper.swift in Sources */,
 				37D321B91C3DE81B00E2245F /* Migrator.swift in Sources */,
 				37E0C57F1C3D4380002182A2 /* Mappings.swift in Sources */,
-				37D321B31C3DE7EC00E2245F /* NSCoder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +346,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37D321BF1C3E550D00E2245F /* NSCoder.swift in Sources */,
 				377C0C591C39076D00B1840F /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

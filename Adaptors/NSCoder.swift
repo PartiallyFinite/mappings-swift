@@ -25,6 +25,9 @@
 //  SOFTWARE.
 //
 
+import Mappings
+import Foundation
+
 extension NSCoder : Decoder {
 
     public func decodeForKey<R>(key: String) -> R? {

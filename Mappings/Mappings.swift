@@ -25,8 +25,6 @@
 //  SOFTWARE.
 //
 
-import Foundation
-
 public protocol Mappable {
 
     func mapWith(mapper: Mapper)
