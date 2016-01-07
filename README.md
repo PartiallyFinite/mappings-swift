@@ -126,3 +126,5 @@ Note also that there is no migration necessary for the deleted `x` property — 
 
 If an adaptor does not exist for the serialisation API you are using, it is relatively simple to write one. See the provided adaptors for [ObjSer](Adaptors/ObjSer.swift) and [NSCoding](Adaptors/NSCoder.swift) for a reference.
 
+If you write your own adaptor, please add it to the Adaptors folder under a descriptive name and submit a [pull request](https://github.com/PartiallyFinite/mappings-swift/pull/new/develop).
+
