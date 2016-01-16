@@ -27,7 +27,7 @@
 
 public protocol Mappable {
 
-    func mapWith(mapper: Mapper)
+    mutating func mapWith(mapper: Mapper)
 
     static var migrators: [Migrator -> Void] { get }
 
@@ -67,7 +67,13 @@ public final class Mappings {
     private static let versionKey = "__mappings_ver"
 
     /// - Throws: `Mappings.DecodeError`
-    public class func decode(v: Mappable, with decoder: Decoder) throws {
+    public class func decode(v: protocol<Mappable, AnyObject>, with decoder: Decoder) throws {
+        var v = v as Mappable
+        try decode(&v, with: decoder)
+    }
+
+    /// - Throws: `Mappings.DecodeError`
+    public class func decode(inout v: Mappable, with decoder: Decoder) throws {
         let archiveVer = decoder.decodeForKey(versionKey) ?? 0
         let currentVer = v.dynamicType.mappingVersion
         guard archiveVer <= currentVer else {
@@ -80,7 +86,12 @@ public final class Mappings {
         v.mapWith(Mapper(decoder: decoder, valueMap: m.values))
     }
 
-    public class func encode(v: Mappable, with encoder: Encoder) {
+    public class func encode(v: protocol<Mappable, AnyObject>, with encoder: Encoder) {
+        var v = v as Mappable
+        encode(&v, with: encoder)
+    }
+
+    public class func encode(inout v: Mappable, with encoder: Encoder) {
         let currentVer = v.dynamicType.mappingVersion
         if currentVer > 0 {
             encoder.encode(currentVer, forKey: versionKey)
