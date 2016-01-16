@@ -161,6 +161,28 @@ class C : NSObject, NSCoding, InitableSerialisable, Mappable {
 
 }
 
+struct S {
+
+    var s: String!
+
+}
+
+extension S : InitableSerialisable, Mappable {
+
+    mutating func mapWith(mapper: Mapper) {
+        mapper.map(&s, forKey: "string")
+    }
+
+    init(deserialiser des: Deserialiser) throws {
+        try Mappings.decode(&self, with: des)
+    }
+
+    func serialiseWith(ser: Serialiser) {
+        Mappings.encode(self, with: ser)
+    }
+
+}
+
 class MappingsTests: XCTestCase {
 
     var a: A!
@@ -217,6 +239,14 @@ class MappingsTests: XCTestCase {
         ObjSer.serialise(b, to: outB)
         let cc: C = try! ObjSer.deserialiseFrom(InputStream(bytes: outB.bytes))
         eqBC(b, c: cc)
+    }
+
+    func testStruct() {
+        let s = S(s: "aoeu")
+        let out = OutputStream()
+        ObjSer.serialise(s, to: out)
+        let t: S = try! ObjSer.deserialiseFrom(InputStream(bytes: out.bytes))
+        XCTAssertEqual(s.s, t.s)
     }
 
 }
