@@ -27,15 +27,15 @@
 
 public protocol Mappable {
 
-    mutating func mapWith(mapper: Mapper)
+    mutating func map(with mapper: Mapper)
 
-    static var migrators: [Migrator -> Void] { get }
+    static var migrators: [(Migrator) -> Void] { get }
 
 }
 
 extension Mappable {
 
-    public static var migrators: [Migrator -> Void] {
+    public static var migrators: [(Migrator) -> Void] {
         return []
     }
 
@@ -48,70 +48,70 @@ extension Mappable {
 
 public protocol Decoder {
 
-    func decodeForKey<R>(key: String) -> R?
+    func decode<R>(forKey key: String) -> R?
 
 }
 
 public protocol Encoder {
 
-    func encode<T>(v: T, forKey key: String)
+    func encode<T>(_ v: T, forKey key: String)
 
 }
 
 public final class Mappings {
 
-    public enum DecodeError : ErrorType {
-        case NewerVersion(type: Mappable.Type, archiveVersion: Int)
+    public enum DecodeError : Error {
+        case newerVersion(type: Mappable.Type, archiveVersion: Int)
     }
 
-    private static let versionKey = "__mappings_ver"
+    fileprivate static let versionKey = "__mappings_ver"
 
     /// - Throws: `Mappings.DecodeError`
     @inline(__always)
-    public class func decode(v: protocol<Mappable, AnyObject>, with decoder: Decoder) throws {
+    public class func decode(_ v: Mappable & AnyObject, with decoder: Decoder) throws {
         var v = v as Mappable
         try _decode(&v, with: decoder)
     }
 
     /// - Throws: `Mappings.DecodeError`
     @inline(__always)
-    public class func decode<T : Mappable>(inout v: T, with decoder: Decoder) throws {
+    public class func decode<T : Mappable>(_ v: inout T, with decoder: Decoder) throws {
         var tmp = v as Mappable
         try _decode(&tmp, with: decoder)
         v = tmp as! T
     }
 
     /// - Throws: `Mappings.DecodeError`
-    private class func _decode(inout v: Mappable, with decoder: Decoder) throws {
-        let archiveVer = decoder.decodeForKey(versionKey) ?? 0
-        let currentVer = v.dynamicType.mappingVersion
+    fileprivate class func _decode(_ v: inout Mappable, with decoder: Decoder) throws {
+        let archiveVer = decoder.decode(forKey: versionKey) ?? 0
+        let currentVer = type(of: v).mappingVersion
         guard archiveVer <= currentVer else {
-            throw DecodeError.NewerVersion(type: v.dynamicType, archiveVersion: archiveVer)
+            throw DecodeError.newerVersion(type: type(of: v), archiveVersion: archiveVer)
         }
         let m = Migrator(decoder: decoder)
-        for mig in v.dynamicType.migrators[archiveVer..<currentVer] {
+        for mig in type(of: v).migrators[archiveVer..<currentVer] {
             mig(m)
         }
-        v.mapWith(Mapper(decoder: decoder, valueMap: m.values))
+        v.map(with: Mapper(decoder: decoder, valueMap: m.values))
     }
 
     @inline(__always)
-    public class func encode(v: protocol<Mappable, AnyObject>, with encoder: Encoder) {
+    public class func encode(_ v: Mappable & AnyObject, with encoder: Encoder) {
         _encode(v, with: encoder)
     }
 
     @inline(__always)
-    public class func encode(v: Mappable, with encoder: Encoder) {
+    public class func encode(_ v: Mappable, with encoder: Encoder) {
         _encode(v, with: encoder)
     }
 
-    private class func _encode(v: Mappable, with encoder: Encoder) {
-        let currentVer = v.dynamicType.mappingVersion
+    fileprivate class func _encode(_ v: Mappable, with encoder: Encoder) {
+        let currentVer = type(of: v).mappingVersion
         if currentVer > 0 {
             encoder.encode(currentVer, forKey: versionKey)
         }
         var v = v
-        v.mapWith(Mapper(encoder: encoder))
+        v.map(with: Mapper(encoder: encoder))
     }
 
 }

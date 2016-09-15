@@ -27,25 +27,25 @@
 
 struct Getter {
 
-    private enum State {
-        case Key(key: String, decoder: Decoder)
-        case Ready(get: () -> Any?)
+    fileprivate enum State {
+        case key(key: String, decoder: Decoder)
+        case ready(get: () -> Any?)
     }
-    private var state: State
-    private var transformers = ContiguousArray<Any? -> Any?>()
+    fileprivate var state: State
+    fileprivate var transformers = ContiguousArray<(Any?) -> Any?>()
 
-    private init(key: String, decoder: Decoder) {
-        state = .Key(key: key, decoder: decoder)
-    }
-
-    private init<V>(value: V) {
-        state = .Ready(get: { value })
+    fileprivate init(key: String, decoder: Decoder) {
+        state = .key(key: key, decoder: decoder)
     }
 
-    private mutating func addTransformer<From, To>(f: From? -> To?) {
-        if case .Key(let key, let decoder) = state {
-            state = .Ready(get: {
-                decoder.decodeForKey(key) as From?
+    fileprivate init<V>(value: V) {
+        state = .ready(get: { value })
+    }
+
+    fileprivate mutating func addTransformer<From, To>(_ f: @escaping (From?) -> To?) {
+        if case .key(let key, let decoder) = state {
+            state = .ready(get: {
+                decoder.decode(forKey: key) as From?
             })
         }
         transformers.append { v in
@@ -55,10 +55,10 @@ struct Getter {
 
     func get<T>() -> T? {
         switch state {
-        case .Key(key: let key, decoder: let decoder):
+        case .key(key: let key, decoder: let decoder):
             assert(transformers.isEmpty, "Getter should not have any transformers if initial type is unresolved.")
-            return decoder.decodeForKey(key) as T?
-        case .Ready(get: let getter):
+            return decoder.decode(forKey: key) as T?
+        case .ready(get: let getter):
             return transformers.reduce(getter()) { (v, f) in f(v) } as! T?
         }
     }
@@ -67,36 +67,45 @@ struct Getter {
 
 public final class Migrator {
 
-    private let decoder: Decoder
+    fileprivate let decoder: Decoder
 
-    private(set) var values = Dictionary<String, Getter>()
+    fileprivate(set) var values = Dictionary<String, Getter>()
 
     init(decoder: Decoder) {
         self.decoder = decoder
     }
 
+    @available(*, unavailable, renamed: "add(value:forKey:)")
+    public func addValue<V>(_ v: V, forKey key: String) { fatalError() }
+
     /// Add value `v` for `key`. If a value already exists for `key`, it is overwritten.
-    public func addValue<V>(v: V, forKey key: String) {
+    public func add<V>(value v: V, forKey key: String) {
         values[key] = Getter(value: v)
     }
 
-    private func getterForKey(key: String) -> Getter {
+    fileprivate func getter(forKey key: String) -> Getter {
         return values[key] ?? Getter(key: key, decoder: decoder)
     }
 
+    @available(*, unavailable, renamed: "migrate(key:toKey:transformer:)")
+    public func migrateKey<From, To>(_ key: String, toKey: String? = nil, transformer: (From?) -> To?) {}
+
     /// Transform the value for `key` using `transformer`, storing it in `toKey`, or `key` if not provided.
-    public func migrateKey<From, To>(key: String, toKey: String? = nil, transformer: From? -> To?) {
+    public func migrate<From, To>(key: String, toKey: String? = nil, transformer: @escaping (From?) -> To?) {
         let toKey = toKey ?? key
-        var getter = getterForKey(key)
+        var g = getter(forKey: key)
         values[key] = nil
-        getter.addTransformer(transformer)
-        values[toKey] = getter
+        g.addTransformer(transformer)
+        values[toKey] = g
     }
 
+    @available(*, unavailable, renamed: "migrate(key:toKey:)")
+    public func migrateKey(_ key: String, toKey: String) {}
+
     /// Migrate the value for `key` to `toKey`.
-    public func migrateKey(key: String, toKey: String) {
+    public func migrate(key: String, toKey: String) {
         precondition(key != toKey, "Cannot migrate from key '\(key)' to itself.")
-        values[toKey] = getterForKey(key)
+        values[toKey] = getter(forKey: key)
         values[key] = nil
     }
 

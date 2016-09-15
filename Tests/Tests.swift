@@ -39,7 +39,7 @@ class A : NSObject, NSCoding, InitableSerialisable, Mappable {
         self.y = y
     }
 
-    func mapWith(mapper: Mapper) {
+    func map(with mapper: Mapper) {
         mapper.map(&x, forKey: "x")
         mapper.map(&y, forKey: "y")
     }
@@ -54,7 +54,7 @@ class A : NSObject, NSCoding, InitableSerialisable, Mappable {
         }
     }
 
-    func encodeWithCoder(aCoder: NSCoder) {
+    func encode(with aCoder: NSCoder) {
         Mappings.encode(self, with: aCoder)
     }
 
@@ -63,7 +63,7 @@ class A : NSObject, NSCoding, InitableSerialisable, Mappable {
         try Mappings.decode(self, with: des)
     }
 
-    func serialiseWith(ser: Serialiser) {
+    func serialise(with ser: Serialiser) {
         Mappings.encode(self, with: ser)
     }
 
@@ -81,14 +81,14 @@ class B : NSObject, NSCoding, InitableSerialisable, Mappable {
         self.z = z
     }
 
-    static let migrators: [Migrator -> Void] = [
+    static let migrators: [(Migrator) -> Void] = [
         { m in
-            m.migrateKey("y", toKey: "z")
-            m.addValue(7.2 as Float, forKey: "y")
+            m.migrate(key: "y", toKey: "z")
+            m.add(value: 7.2 as Float, forKey: "y")
         }
     ]
 
-    func mapWith(mapper: Mapper) {
+    func map(with mapper: Mapper) {
         mapper.map(&x, forKey: "x")
         mapper.map(&y, forKey: "y")
         mapper.map(&z, forKey: "z")
@@ -99,7 +99,7 @@ class B : NSObject, NSCoding, InitableSerialisable, Mappable {
         guard (try? Mappings.decode(self, with: aDecoder)) != nil else { return nil }
     }
 
-    func encodeWithCoder(aCoder: NSCoder) {
+    func encode(with aCoder: NSCoder) {
         Mappings.encode(self, with: aCoder)
     }
 
@@ -108,7 +108,7 @@ class B : NSObject, NSCoding, InitableSerialisable, Mappable {
         try Mappings.decode(self, with: des)
     }
 
-    func serialiseWith(ser: Serialiser) {
+    func serialise(with ser: Serialiser) {
         Mappings.encode(self, with: ser)
     }
 
@@ -124,19 +124,19 @@ class C : NSObject, NSCoding, InitableSerialisable, Mappable {
         self.z = z
     }
 
-    static let migrators: [Migrator -> Void] = [
+    static let migrators: [(Migrator) -> Void] = [
         { m in
-            m.migrateKey("y", toKey: "z")
-            m.addValue(7.2 as Float, forKey: "y")
+            m.migrate(key: "y", toKey: "z")
+            m.add(value: 7.2 as Float, forKey: "y")
         },
         { m in
-            m.migrateKey("y") { (v: Float?) -> Int? in
+            m.migrate(key: "y") { (v: Float?) -> Int? in
                 v != nil ? Int(v!) : nil
             }
         }
     ]
 
-    func mapWith(mapper: Mapper) {
+    func map(with mapper: Mapper) {
         mapper.map(&y, forKey: "y")
         mapper.map(&z, forKey: "z")
     }
@@ -146,7 +146,7 @@ class C : NSObject, NSCoding, InitableSerialisable, Mappable {
         guard (try? Mappings.decode(self, with: aDecoder)) != nil else { return nil }
     }
 
-    func encodeWithCoder(aCoder: NSCoder) {
+    func encode(with aCoder: NSCoder) {
         Mappings.encode(self, with: aCoder)
     }
 
@@ -155,7 +155,7 @@ class C : NSObject, NSCoding, InitableSerialisable, Mappable {
         try Mappings.decode(self, with: des)
     }
 
-    func serialiseWith(ser: Serialiser) {
+    func serialise(with ser: Serialiser) {
         Mappings.encode(self, with: ser)
     }
 
@@ -169,7 +169,7 @@ struct S {
 
 extension S : InitableSerialisable, Mappable {
 
-    mutating func mapWith(mapper: Mapper) {
+    mutating func map(with mapper: Mapper) {
         mapper.map(&s, forKey: "string")
     }
 
@@ -177,7 +177,7 @@ extension S : InitableSerialisable, Mappable {
         try Mappings.decode(&self, with: des)
     }
 
-    func serialiseWith(ser: Serialiser) {
+    func serialise(with ser: Serialiser) {
         Mappings.encode(self, with: ser)
     }
 
@@ -198,46 +198,46 @@ class MappingsTests: XCTestCase {
         super.tearDown()
     }
 
-    func eqAB(b: B) {
+    func eqAB(_ b: B) {
         XCTAssertEqual(a.x, b.x)
         XCTAssertEqual(a.y, b.z)
         XCTAssertEqual(7.2, b.y)
     }
 
-    func eqAC(c: C) {
+    func eqAC(_ c: C) {
         XCTAssertEqual(a.y, c.z)
         XCTAssertEqual(c.y, 7)
     }
 
-    func eqBC(b: B, c: C) {
+    func eqBC(_ b: B, c: C) {
         XCTAssertEqual(Int(b.y!), c.y!)
         XCTAssertEqual(b.z, c.z)
     }
     
     func testNSCoding() {
-        let dataA = NSKeyedArchiver.archivedDataWithRootObject(a)
+        let dataA = NSKeyedArchiver.archivedData(withRootObject: a)
         NSKeyedUnarchiver.setClass(B.self, forClassName: "MappingsTests.A")
-        let b = NSKeyedUnarchiver.unarchiveObjectWithData(dataA)! as! B
+        let b = NSKeyedUnarchiver.unarchiveObject(with: dataA)! as! B
         eqAB(b)
         NSKeyedUnarchiver.setClass(C.self, forClassName: "MappingsTests.A")
-        let c = NSKeyedUnarchiver.unarchiveObjectWithData(dataA)! as! C
+        let c = NSKeyedUnarchiver.unarchiveObject(with: dataA)! as! C
         eqAC(c)
-        let dataB = NSKeyedArchiver.archivedDataWithRootObject(b)
+        let dataB = NSKeyedArchiver.archivedData(withRootObject: b)
         NSKeyedUnarchiver.setClass(C.self, forClassName: "MappingsTests.B")
-        let cc = NSKeyedUnarchiver.unarchiveObjectWithData(dataB)! as! C
+        let cc = NSKeyedUnarchiver.unarchiveObject(with: dataB)! as! C
         eqBC(b, c: cc)
     }
 
     func testObjSer() {
         let outA = OutputStream()
         ObjSer.serialise(a, to: outA)
-        let b: B = try! ObjSer.deserialiseFrom(InputStream(bytes: outA.bytes))
+        let b: B = try! ObjSer.deserialise(from: InputStream(bytes: outA.bytes))
         eqAB(b)
-        let c: C = try! ObjSer.deserialiseFrom(InputStream(bytes: outA.bytes))
+        let c: C = try! ObjSer.deserialise(from: InputStream(bytes: outA.bytes))
         eqAC(c)
         let outB = OutputStream()
         ObjSer.serialise(b, to: outB)
-        let cc: C = try! ObjSer.deserialiseFrom(InputStream(bytes: outB.bytes))
+        let cc: C = try! ObjSer.deserialise(from: InputStream(bytes: outB.bytes))
         eqBC(b, c: cc)
     }
 
@@ -245,7 +245,7 @@ class MappingsTests: XCTestCase {
         let s = S(s: "aoeu")
         let out = OutputStream()
         ObjSer.serialise(s, to: out)
-        let t: S = try! ObjSer.deserialiseFrom(InputStream(bytes: out.bytes))
+        let t: S = try! ObjSer.deserialise(from: InputStream(bytes: out.bytes))
         XCTAssertEqual(s.s, t.s)
     }
 

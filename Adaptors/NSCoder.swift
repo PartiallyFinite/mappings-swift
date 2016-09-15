@@ -30,17 +30,17 @@ import Foundation
 
 extension NSCoder : Decoder {
 
-    public func decodeForKey<R>(key: String) -> R? {
+    public func decode<R>(forKey key: String) -> R? {
         func decode() -> Any? {
             switch R.self {
-            case is Bool.Type: return decodeBoolForKey(key)
-            case is Int.Type: return decodeIntegerForKey(key)
-            case is Int32.Type: return decodeInt32ForKey(key)
-            case is Int64.Type: return decodeInt64ForKey(key)
-            case is Float.Type: return decodeFloatForKey(key)
-            case is Double.Type: return decodeDoubleForKey(key)
+            case is Bool.Type: return decodeBool(forKey: key)
+            case is Int.Type: return decodeInteger(forKey: key)
+            case is Int32.Type: return decodeInt32(forKey: key)
+            case is Int64.Type: return decodeInt64(forKey: key)
+            case is Float.Type: return decodeFloat(forKey: key)
+            case is Double.Type: return decodeDouble(forKey: key)
             default:
-                if let v = decodeObjectForKey(key) {
+                if let v = decodeObject(forKey: key) {
                     if let v = v as? R {
                         return v
                     }
@@ -49,7 +49,7 @@ extension NSCoder : Decoder {
                 return nil
             }
         }
-        if containsValueForKey(key), let v = decode() {
+        if containsValue(forKey: key), let v = decode() {
             return (v as! R)
         }
         return nil
@@ -59,22 +59,17 @@ extension NSCoder : Decoder {
 
 extension NSCoder : Encoder {
 
-    public func encode<T>(v: T, forKey key: String) {
+    public func encode<T>(_ v: T, forKey key: String) {
         switch T.self {
-        case is Bool.Type: encodeBool(v as! Bool, forKey: key)
-        case is Int.Type: encodeInteger(v as! Int, forKey: key)
-        case is Int32.Type: encodeInt32(v as! Int32, forKey: key)
-        case is Int64.Type: encodeInt64(v as! Int64, forKey: key)
-        case is Float.Type: encodeFloat(v as! Float, forKey: key)
-        case is Double.Type: encodeDouble(v as! Double, forKey: key)
-        case is String.Type: encodeObject(v as! String, forKey: key)
+        case is Bool.Type: self.encode(v as! Bool, forKey: key)
+        case is Int.Type: self.encode(v as! Int, forKey: key)
+        case is Int32.Type: self.encode(v as! Int32, forKey: key)
+        case is Int64.Type: self.encode(v as! Int64, forKey: key)
+        case is Float.Type: self.encode(v as! Float, forKey: key)
+        case is Double.Type: self.encode(v as! Double, forKey: key)
+        case is String.Type: self.encode(v as! String, forKey: key)
         default:
-            if let v = v as? AnyObject {
-                encodeObject(v, forKey: key)
-            }
-            else {
-                fatalError("Unsupported type \(T.self).")
-            }
+            (self.encode as (Any?, String) -> Void)(v, key)
         }
     }
     

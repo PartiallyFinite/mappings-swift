@@ -28,33 +28,33 @@
 public final class Mapper {
 
     private enum State {
-        case Encoding(Encoder)
-        case Decoding(Decoder, values: Dictionary<String, Getter>)
+        case encoding(Encoder)
+        case decoding(Decoder, values: Dictionary<String, Getter>)
     }
 
     private let state: State
 
     init(decoder: Decoder, valueMap: Dictionary<String, Getter>) {
-        state = .Decoding(decoder, values: valueMap)
+        state = .decoding(decoder, values: valueMap)
     }
 
     init(encoder: Encoder) {
-        state = .Encoding(encoder)
+        state = .encoding(encoder)
     }
 
-    private func decodeForKey<T>(key: String, decoder: Decoder, values: Dictionary<String, Getter>) -> T? {
+    private func decode<T>(forKey key: String, decoder: Decoder, values: Dictionary<String, Getter>) -> T? {
         if let getter = values[key] {
             return getter.get()
         }
-        return decoder.decodeForKey(key)
+        return decoder.decode(forKey: key)
     }
 
-    public func map<T>(inout v: T, forKey key: String) {
+    public func map<T>(_ v: inout T, forKey key: String) {
         switch state {
-        case .Encoding(let enc):
+        case .encoding(let enc):
             enc.encode(v, forKey: key)
-        case .Decoding(let dec, let values):
-            guard let vv: T = decodeForKey(key, decoder: dec, values: values) else {
+        case .decoding(let dec, let values):
+            guard let vv: T = decode(forKey: key, decoder: dec, values: values) else {
                 // TODO: do something more sensible
                 fatalError()
             }
@@ -62,20 +62,20 @@ public final class Mapper {
         }
     }
 
-    public func map<T>(inout v: T!, forKey key: String) {
+    public func map<T>(_ v: inout T!, forKey key: String) {
         var t = v as Optional
         map(&t, forKey: key)
         v = t
     }
 
-    public func map<T>(inout v: T?, forKey key: String) {
+    public func map<T>(_ v: inout T?, forKey key: String) {
         switch state {
-        case .Encoding(let enc):
+        case .encoding(let enc):
             if let v = v {
                 enc.encode(v, forKey: key)
             }
-        case .Decoding(let dec, let values):
-            v = decodeForKey(key, decoder: dec, values: values)
+        case .decoding(let dec, let values):
+            v = decode(forKey: key, decoder: dec, values: values)
         }
     }
 

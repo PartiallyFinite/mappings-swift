@@ -30,15 +30,15 @@ import Mappings
 
 extension Deserialiser : Decoder {
 
-    public func decodeForKey<R>(key: String) -> R? {
-        return try! deserialiseKeyUnconstrained(key)
+    public func decode<R>(forKey key: String) -> R? {
+        return try! deserialiseUnconstrained(forKey: key)
     }
 
 }
 
 extension Serialiser : Encoder {
 
-    public func encode<T>(v: T, forKey key: String) {
+    public func encode<T>(_ v: T, forKey key: String) {
         serialise(unconstrained: v, forKey: key)
     }
 
